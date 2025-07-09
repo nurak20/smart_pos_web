@@ -148,7 +148,6 @@ const Product = () => {
             } else {
                 await ProductService.updateProduct({ payload: payload, productId: formData.product_id });
             }
-            const res = await ProductService.createNewProduct({ payload: payload });
             getProductListing();
             handleClose();
         } catch (err) {
@@ -225,10 +224,10 @@ const Product = () => {
             sortable: false,
             renderCell: (params) => (
                 <Box>
-                    <IconButton onClick={() => handleOpen({ type: "update", data: params.row })}>
+                    <IconButton color='success' onClick={() => handleOpen({ type: "update", data: params.row })}>
                         <EditIcon />
                     </IconButton>
-                    <IconButton>
+                    <IconButton color='error'>
                         <DeleteIcon />
                     </IconButton>
                 </Box>
@@ -268,46 +267,46 @@ const Product = () => {
                         disableSelectionOnClick
                         getRowId={(row) => row.product_id}
                         sx={{
-                            '& .MuiDataGrid-root': {
-                                border: 'none',
-                                outline: 'none',
-                            },
+
+                            borderRadius: 0,
+                            /* remove outer border */
+                            border: 'none',
+                            /* remove cell bottom borders */
                             '& .MuiDataGrid-cell': {
                                 borderBottom: 'none',
                             },
+                            /* remove header bottom border */
                             '& .MuiDataGrid-columnHeaders': {
-                                backgroundColor: '#f5f5f5',
                                 borderBottom: 'none',
+                                backgroundColor: '#f5f5f5',
                             },
-                            '& .MuiDataGrid-virtualScroller': {
-                                backgroundColor: '#ffffff',
+                            /* hide the little vertical separators between columns */
+                            '& .MuiDataGrid-columnSeparator': {
+                                display: 'none',
                             },
+                            /* remove footer top border */
                             '& .MuiDataGrid-footerContainer': {
                                 borderTop: 'none',
                                 backgroundColor: '#f5f5f5',
                             },
-
-                            // remove focus outlines everywhere
-                            '& .MuiDataGrid-cell:focus, & .MuiDataGrid-cell:focus-within': {
-                                outline: 'none',
-                            },
-                            '& .MuiDataGrid-columnHeader:focus, & .MuiDataGrid-columnHeader:focus-within': {
-                                outline: 'none',
-                            },
-                            '& .MuiDataGrid-root:focus': {
-                                outline: 'none',
+                            /* rest of your styling… */
+                            '& .MuiDataGrid-virtualScroller': {
+                                backgroundColor: '#ffffff',
                             },
                             '& .MuiDataGrid-row:hover': {
                                 cursor: 'pointer',
-                                backgroundColor: StyleColors.appColorLv2,
+                                backgroundColor: 'rgba(166, 166, 166, 0.04)',
                             },
                             '& .MuiDataGrid-row.Mui-selected': {
                                 backgroundColor: StyleColors.appColorLv1,
                             },
-                            // if you still want a hover effect:
                             '& .MuiDataGrid-row.Mui-selected:hover': {
-                                backgroundColor: StyleColors.appColorLv1,  // a lighter pink on hover
-                            }
+                                backgroundColor: StyleColors.appColorLv1,
+                            },
+                            /* remove focus outlines */
+                            '& .MuiDataGrid-cell:focus, & .MuiDataGrid-cell:focus-within, & .MuiDataGrid-columnHeader:focus': {
+                                outline: 'none',
+                            },
                         }}
                     />
                 </Paper>
@@ -316,7 +315,7 @@ const Product = () => {
             {/* Dialog */}
             <Dialog open={openDialog} fullWidth maxWidth="md">
                 <DialogTitle>
-                    Create New Product
+                    {isCreateNew ? 'Create New Product' : 'Update Product'}
                     <IconButton
                         aria-label="close"
                         onClick={handleClose}
