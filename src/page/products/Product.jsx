@@ -236,7 +236,7 @@ const Product = () => {
     ];
 
     return (
-        <Box sx={{ background: 'white' }}>
+        <Box sx={{ background: 'white', borderRadius: '10px', pb: 2 }}>
             <AppBar position="static" sx={{ background: 'white' }} elevation={0}>
                 <Box sx={{ display: 'flex', alignItems: 'center', px: 2, pt: 2 }}>
                     <Typography variant="h5" color={StyleColors.textDarkGray} sx={{ flexGrow: 1 }}>Product Management</Typography>
@@ -256,7 +256,7 @@ const Product = () => {
             {loading ? (
                 <Box sx={{ display: 'flex', justifyContent: 'center', p: 4 }}><CircularProgress /></Box>
             ) : (
-                <Paper sx={{ m: 2, height: 600 }} elevation={0}>
+                <Paper sx={{ m: 2, height: '100%', maxHeight: '900px' }} elevation={0}>
                     <DataGrid
                         rows={filteredProducts}
                         columns={columns}
@@ -404,7 +404,6 @@ const Product = () => {
                             <POSFormImageUpload
                                 name="image_url"
                                 label="Upload Image"
-                                uploadUrl="https://api.cloudinary.com/v1_1/dml2cm2bm/image/upload"
                                 uploadPreset="NurakPOS"
                                 value={formData.image_url}
                                 onUpload={(e) => {
