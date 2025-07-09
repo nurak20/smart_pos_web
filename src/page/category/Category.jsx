@@ -40,6 +40,7 @@ import CategoryIcon from '@mui/icons-material/Category';
 import DescriptionIcon from '@mui/icons-material/Description';
 import ImageIcon from '@mui/icons-material/Image';
 import ToggleOnIcon from '@mui/icons-material/ToggleOn';
+import { CategoryService } from './CategoryService';
 
 const API_GET = 'v1/categories';
 const API_POST = 'https://api.txteams.net/api/v1/categories';
@@ -63,19 +64,20 @@ const Category = () => {
 
     // Fetch categories
     useEffect(() => {
-        const fetchCategories = async () => {
-            try {
-                const res = await axiosGET('v1/categories');
-                console.log(res.data);
-                setCategories(res.data || []);
-            } catch (err) {
-                setNotify({ open: true, message: 'Failed to load categories', severity: 'error' });
-            } finally {
-                setLoading(false);
-            }
-        };
-        fetchCategories();
+        getCategoriesListing();
     }, []);
+
+    const getCategoriesListing = async () => {
+        try {
+            const res = await CategoryService.getCategories();
+
+            setCategories(res || []);
+        } catch (err) {
+
+        } finally {
+            setLoading(false);
+        }
+    };
 
     // Handlers
     const handleOpen = () => setOpenDialog(true);
@@ -107,14 +109,15 @@ const Category = () => {
                 created_by: 'current-user-id',
                 updated_by: 'current-user-id',
             };
-            await axios.post(API_POST, payload);
-            setNotify({ open: true, message: 'Category created successfully', severity: 'success' });
-            // Reload list
-            const { data } = await axios.get(API_GET);
-            setCategories(data.data || []);
-            handleClose();
+            const res = await CategoryService.createNewCategory({ payload: payload });
+            if (res) {
+                getCategoriesListing();
+                handleClose();
+
+            }
+
         } catch (err) {
-            setNotify({ open: true, message: 'Category creation failed', severity: 'error' });
+
         }
     };
 
@@ -170,9 +173,9 @@ const Category = () => {
                                         <TableCell>{row.name}</TableCell>
                                         <TableCell>{row.description}</TableCell>
                                         <TableCell>
-                                            <span style={{ 
+                                            <span style={{
                                                 color: row.status === 'true' ? '#4caf50' : '#f44336',
-                                                fontWeight: 'bold' 
+                                                fontWeight: 'bold'
                                             }}>
                                                 {row.status === 'true' ? 'Active' : 'Inactive'}
                                             </span>
