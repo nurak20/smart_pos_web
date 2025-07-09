@@ -52,6 +52,7 @@ import {
 } from '@mui/icons-material';
 import { theme } from '../Dashboard';
 import { StyleColors } from '../../../util/helper/Extension';
+import { useNavigate } from 'react-router-dom';
 
 const DashboardLayout = ({ children }) => {
     const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -72,20 +73,24 @@ const DashboardLayout = ({ children }) => {
     const handleMenuClose = () => {
         setAnchorEl(null);
     };
+    const navigate = useNavigate();
 
-    const handleNavItemClick = (text) => {
+    const handleNavItemClick = (text, path) => {
         setActiveItem(text);
+        navigate(path);
         if (isMobile) {
             setSidebarOpen(false);
         }
     };
 
     const drawer = (
-        <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column', }}>
+        <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column', background: 'white', }}>
+
             <Box
                 sx={{
                     display: 'flex',
                     alignItems: 'center',
+
                     p: 2,
                     borderBottom: 1,
                     borderColor: 'divider',
@@ -116,19 +121,20 @@ const DashboardLayout = ({ children }) => {
                     <ListItemButton
                         key={item.text}
                         selected={activeItem === item.text}
-                        onClick={() => handleNavItemClick(item.text)}
+                        onClick={() => handleNavItemClick(item.text, item.path)}
                         sx={{
+
                             mx: 1,
                             mb: 0.5,
-                            borderRadius: 1,
+                            borderRadius: 0.5,
                             '&.Mui-selected': {
-                                backgroundColor: StyleColors.componentsGreen,
-                                color: 'white',
+                                background: 'none',
+                                color: StyleColors.appColorLv7,
                                 '&:hover': {
-                                    backgroundColor: StyleColors.componentsHover,
+                                    backgroundColor: StyleColors.appColorLv1,
                                 },
                                 '& .MuiListItemIcon-root': {
-                                    color: 'white',
+                                    color: StyleColors.appColorLv7,
                                 },
                             },
                         }}
@@ -141,61 +147,13 @@ const DashboardLayout = ({ children }) => {
                     </ListItemButton>
                 ))}
             </List>
+
         </Box>
     );
 
     return (
         <Box sx={{ display: 'flex', minHeight: '100vh', }}>
             {/* App Bar */}
-            <AppBar
-                position="fixed"
-                elevation={0}
-
-                sx={{
-
-                    background: 'none',
-                    width: { md: `calc(100% - ${sidebarOpen ? drawerWidth : 0}px)` },
-                    ml: { md: sidebarOpen ? `${drawerWidth}px` : 0 },
-                    transition: theme.transitions.create(['width', 'margin'], {
-                        easing: theme.transitions.easing.sharp,
-                        duration: theme.transitions.duration.leavingScreen,
-                    }),
-                }}
-            >
-                <Toolbar>
-                    <IconButton
-
-                        aria-label="toggle drawer"
-                        edge="start"
-                        onClick={handleDrawerToggle}
-                        sx={{ mr: 2 }}
-                    >
-                        <MenuIcon />
-                    </IconButton>
-                    <Typography variant="h6" noWrap component="div" sx={{ flexGrow: 1, color: StyleColors.textGray }}>
-                        {activeItem}
-                    </Typography>
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                        <IconButton aria-label="notifications">
-                            <Badge badgeContent={4} color="error">
-                                <NotificationsIcon />
-                            </Badge>
-                        </IconButton>
-                        <IconButton
-
-                            onClick={handleMenuClick}
-                            aria-label="user menu"
-                            aria-controls="user-menu"
-                            aria-haspopup="true"
-                        >
-                            <Avatar sx={{ width: 32, height: 32 }}>
-                                <PersonIcon />
-                            </Avatar>
-                        </IconButton>
-                    </Box>
-                </Toolbar>
-
-            </AppBar>
 
             {/* User Menu */}
             <Menu
@@ -235,7 +193,7 @@ const DashboardLayout = ({ children }) => {
             {/* Sidebar */}
             <Box
                 component="nav"
-                sx={{ width: { md: sidebarOpen ? drawerWidth : 0 }, flexShrink: { md: 0 } }}
+                sx={{ width: { md: sidebarOpen ? drawerWidth : 0 }, flexShrink: { md: 0 }, }}
             >
                 {isMobile ? (
                     <Drawer
@@ -259,6 +217,7 @@ const DashboardLayout = ({ children }) => {
                         variant="persistent"
                         open={sidebarOpen}
                         sx={{
+
                             '& .MuiDrawer-paper': {
 
                                 boxSizing: 'border-box',
@@ -282,7 +241,52 @@ const DashboardLayout = ({ children }) => {
                     backgroundColor: 'background.default',
                 }}
             >
-                <Toolbar />
+                <AppBar
+                    position='static'
+                    elevation={0}
+
+                    sx={{
+
+                        background: 'none',
+                        width: '100%',
+
+                    }}
+                >
+                    <Toolbar>
+                        <IconButton
+
+                            aria-label="toggle drawer"
+                            edge="start"
+                            onClick={handleDrawerToggle}
+                            sx={{ mr: 2 }}
+                        >
+                            <MenuIcon />
+                        </IconButton>
+                        <Typography variant="h6" noWrap component="div" sx={{ flexGrow: 1, color: StyleColors.textGray }}>
+                            {activeItem}
+                        </Typography>
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                            <IconButton aria-label="notifications">
+                                <Badge badgeContent={4} color="error">
+                                    <NotificationsIcon />
+                                </Badge>
+                            </IconButton>
+                            <IconButton
+
+                                onClick={handleMenuClick}
+                                aria-label="user menu"
+                                aria-controls="user-menu"
+                                aria-haspopup="true"
+                            >
+                                <Avatar sx={{ width: 32, height: 32 }}>
+                                    <PersonIcon />
+                                </Avatar>
+                            </IconButton>
+                        </Box>
+                    </Toolbar>
+
+                </AppBar>
+
                 {children}
             </Box>
         </Box>
@@ -293,8 +297,7 @@ const DashboardLayout = ({ children }) => {
 
 const navigationItems = [
     { text: 'Overview', icon: DashboardIcon, path: '/' },
-    { text: 'Sales', icon: SalesIcon, path: '/sales' },
-    { text: 'Inventory', icon: InventoryIcon, path: '/inventory' },
+    { text: 'Product', icon: InventoryIcon, path: '/product' },
     { text: 'Reports', icon: ReportsIcon, path: '/reports' },
 ];
 

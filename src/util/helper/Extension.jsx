@@ -4,79 +4,55 @@ export const StyleColors = {
     componentsHover: 'rgb(179, 56, 103)',
     textDarkGray: 'rgb(41, 40, 40)',
     textGray: 'rgb(119, 118, 118)',
-    ButtonStyle:
-    {
-        SmallButton: {
-            background: "var(--components-color)",
-            borderRadius: '5px',
-            fontSize: '16px',
-            fontWeight: '400',
-            maxHeight: '35px',
-            color: "white",
-            padding: '13px 0px',
-            textTransform: "none",
-            boxShadow: '0 4px 15px rgba(105, 40, 61, 0.3)',
-            '&:hover': {
-                background: 'rgb(107, 47, 72)',
-                boxShadow: '0 6px 20px rgba(101, 49, 67, 0.4)',
-
-            },
-            '&:disabled': {
-                background: 'rgb(166, 111, 134)',
-                color: '#bdbdbd',
-                boxShadow: 'none',
-            },
-            transition: 'all 0.3s ease',
+    appColorLv1: '#f9f6f8',
+    appColorLv2: '#f4eff2',
+    appColorLv3: '#ebdfe6',
+    appColorLv4: '#dbc6d1',
+    appColorLv5: '#b08499',
+    appColorLv6: '#99697d',
+    appColorLv7: '#825567',
+    appColorLv8: '#6c4855',
+    appColorLv9: '#5c3f4b',
+    appColorLv10: '#352229',
+    ButtonStyle: {
+        background: '#6c4855',
+        borderRadius: '4px',
+        fontSize: '16px',
+        fontWeight: '400',
+        maxHeight: '47px',
+        color: "white",
+        padding: '10px 20px',
+        textTransform: "none",
+        '&:hover': {
+            background: '#352229',
         },
-        MediumButton: {
-            background: "var(--components-color)",
-            borderRadius: '5px',
-            fontSize: '16px',
-            fontWeight: '400',
-            maxHeight: '40px',
-            color: "white",
-            padding: '13px 0px',
-            textTransform: "none",
-            boxShadow: '0 4px 15px rgba(105, 40, 61, 0.3)',
-            '&:hover': {
-                background: 'rgb(107, 47, 72)',
-                boxShadow: '0 6px 20px rgba(101, 49, 67, 0.4)',
-
-            },
-            '&:disabled': {
-                background: 'rgb(166, 111, 134)',
-                color: '#bdbdbd',
-                boxShadow: 'none',
-            },
-            transition: 'all 0.3s ease',
+        '&:disabled': {
+            background: '#6c4855',
+            color: '#bdbdbd',
         },
-        LargeButton:
-        {
-            background: "var(--components-color)",
-            borderRadius: '8px',
-            fontSize: '16px',
-            fontWeight: '400',
-            maxHeight: '50px',
-            color: "white",
-            padding: '13px 0px',
-            textTransform: "none",
-            boxShadow: '0 4px 15px rgba(105, 40, 61, 0.3)',
-            '&:hover': {
-                background: 'rgb(107, 47, 72)',
-                boxShadow: '0 6px 20px rgba(101, 49, 67, 0.4)',
-
-            },
-            '&:disabled': {
-                background: 'rgb(166, 111, 134)',
-                color: '#bdbdbd',
-                boxShadow: 'none',
-            },
-            transition: 'all 0.3s ease',
+        transition: 'all 0.3s ease',
+    },
+    ButtonStyleOutline: {
+        background: 'none',
+        borderRadius: '4px',
+        fontSize: '16px',
+        fontWeight: '400',
+        maxHeight: '47px',
+        color: "#352229",
+        padding: '10px 20px',
+        textTransform: "none",
+        '&:hover': {
+            background: '#f4eff2',
         },
+        '&:disabled': {
+            background: '#6c4855',
+            color: '#bdbdbd',
+        },
+        transition: 'all 0.3s ease',
     },
     TextFieldStyle: {
         '& .MuiOutlinedInput-root': {
-            borderRadius: '8px',
+            borderRadius: '4px',
             outline: 'none !important',
             '& fieldset': {
                 borderColor: "var(--components-color)",

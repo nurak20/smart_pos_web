@@ -39,7 +39,7 @@ import { axiosGET } from "../../../service/ApiService";
 import { formatDate, formatKHR, formatUSD, StyleColors } from "../../../util/helper/Extension";
 
 
-const RecentTransactionsTable = ({ transactions }) => {
+const RecentTransactionsTable = () => {
     const [page, setPage] = useState(0);
     const [rowsPerPage, setRowsPerPage] = useState(5);
     const [orders, setOrders] = useState([]);
@@ -134,7 +134,7 @@ const RecentTransactionsTable = ({ transactions }) => {
                     <TablePagination
                         rowsPerPageOptions={[5, 10, 25]}
                         component="div"
-                        count={transactions.length}
+
                         rowsPerPage={rowsPerPage}
                         page={page}
                         onPageChange={handleChangePage}
