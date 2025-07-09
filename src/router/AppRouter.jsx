@@ -5,6 +5,7 @@ import Product from "../page/products/Product";
 import Category from "../page/category/Category";
 import Login from "../page/login/Login";
 import NotFound from "../page/not-found/NotFound";
+import Profile from "../page/profile/Profile";
 
 
 export const AppRouter = () => (
@@ -14,7 +15,7 @@ export const AppRouter = () => (
         <Route path="/product/:id" element={<Product />} />
         <Route path="/category" element={<Category/>} />
         <Route path="/login" element={<Login />} />
-        <Route path="*" element={<NotFound/>} />
-        {/* Add more routes as needed */}
+        <Route path="*" element={<NotFound />} />
+        <Route path="profile" element={<Profile />} />
     </Routes>
 );
