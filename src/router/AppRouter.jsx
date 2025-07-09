@@ -12,9 +12,8 @@ export const AppRouter = () => (
         <Route path="/" element={<RecentTransactionsTable />} />
         <Route path="/product" element={<Product />} />
         <Route path="/product/:id" element={<Product />} />
-        <Route path="/category" element={<Category/>} />
-        <Route path="/login" element={<Login />} />
-        <Route path="*" element={<NotFound/>} />
+        <Route path="/category" element={<Category />} />
+        <Route path="*" element={<NotFound />} />
         {/* Add more routes as needed */}
     </Routes>
 );

@@ -13,19 +13,13 @@ import {
     DialogActions,
     TextField,
     MenuItem,
-    TableContainer,
-    Table,
-    TableHead,
-    TableRow,
-    TableCell,
-    TableBody,
-    TablePagination,
     Snackbar,
     Alert,
     CircularProgress,
     Paper,
     Avatar
 } from '@mui/material';
+import { DataGrid } from '@mui/x-data-grid';
 import {
     Add as AddIcon,
     Close as CloseIcon,
@@ -45,6 +39,8 @@ import CodeIcon from '@mui/icons-material/Code';
 import ImageIcon from '@mui/icons-material/Image';
 import DescriptionIcon from '@mui/icons-material/Description';
 import { ProductService } from './Service';
+import { CategoryService } from '../category/CategoryService';
+import POSFormImageUpload from '../../components/file_upload';
 
 
 const Product = () => {
@@ -55,6 +51,7 @@ const Product = () => {
     const [page, setPage] = useState(0);
     const [rowsPerPage, setRowsPerPage] = useState(10);
     const [search, setSearch] = useState('');
+    const [isCreateNew, setIsCreateNew] = useState(true);
     const [formData, setFormData] = useState({
         category_id: '',
         code: '',
@@ -87,12 +84,37 @@ const Product = () => {
     };
 
     // Handlers
-    const handleOpen = () => setOpenDialog(true);
+    // inside your component, update handleOpen:
+    const handleOpen = ({ type = "create", data = null }) => {
+        setIsCreateNew(type === "create");
+        if (type === "update" && data) {
+            // seed the form with the product you clicked
+            setFormData({
+                category_id: data.category_id,
+                code: data.code,
+                product_name: data.product_name,
+                cost_price: data.cost_price,
+                selling_price: data.selling_price,
+                stock: data.stock,
+                description: data.description,
+                warehouse_id: data.warehouse_id,
+                image_url: data.image_url,
+                group_code: data.group_code,
+                brand_name: data.brand_name,
+                // keep the id handy for the update call
+                product_id: data.product_id,
+            });
+        }
+        setOpenDialog(true);
+    };
+
+
     const handleClose = () => {
         setOpenDialog(false);
         setFormData({ category_id: '', code: '', product_name: '', cost_price: '', selling_price: '', stock: '', description: '', warehouse_id: '', image_url: '', group_code: '', brand_name: '' });
         setErrors({});
     };
+
     const handleChange = (e) => {
         const { name, value } = e.target;
         setFormData(prev => ({ ...prev, [name]: value }));
@@ -117,10 +139,15 @@ const Product = () => {
             const payload = {
                 ...formData,
                 code: new Date().getTime(),
-                warehouse_id: '',
+                warehouse_id: null,
                 created_by: 'c161a77f-94d2-4ea5-a34f-15cf43f61eda',
                 updated_by: 'c161a77f-94d2-4ea5-a34f-15cf43f61eda',
             };
+            if (isCreateNew) {
+                await ProductService.createNewProduct({ payload: payload });
+            } else {
+                await ProductService.updateProduct({ payload: payload, productId: formData.product_id });
+            }
             const res = await ProductService.createNewProduct({ payload: payload });
             getProductListing();
             handleClose();
@@ -129,19 +156,84 @@ const Product = () => {
         }
     };
 
-    const handleChangePage = (_, newPage) => setPage(newPage);
-    const handleChangeRowsPerPage = (e) => { setRowsPerPage(parseInt(e.target.value, 10)); setPage(0); };
-
-    // Filtered & paginated
-    const filtered = products.filter(p => p.product_name.toLowerCase().includes(search.toLowerCase()));
-    const paginated = filtered.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
-
     // Sample categories
-    const categories = [
-        { id: '3aad7eb4-6799-4f0e-a906-31ee20f261a7', name: 'Beauty & Cosmetics' },
-        { id: '2e52d617-7fd8-41a0-86d7-3969730285d0', name: 'Fashion & Apparel' },
-        { id: '1234567-1234-1234-1234-123456789012', name: 'Electronics' },
-        { id: '9876543-9876-9876-9876-987654321098', name: 'Home & Garden' }
+    const [categories, setCategories] = useState([]);
+    useEffect(() => {
+        const getCategoriesListing = async () => {
+            try {
+                const res = await CategoryService.getCategories();
+                setCategories(res)
+            } catch (err) {
+                console.log(err)
+            }
+        }
+        getCategoriesListing();
+    }, [])
+
+    // Filtered data for DataGrid
+    const filteredProducts = products.filter(p =>
+        p.product_name.toLowerCase().includes(search.toLowerCase())
+    );
+
+    // DataGrid columns configuration
+    const columns = [
+        {
+            field: 'product',
+            headerName: 'Product',
+            flex: 1,
+            minWidth: 200,
+            renderCell: (params) => (
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                    <Avatar src={params.row.image_url} />
+                    {params.row.product_name}
+                </Box>
+            )
+        },
+        {
+            field: 'code',
+            headerName: 'Code',
+            flex: 0.5,
+            minWidth: 120
+        },
+        {
+            field: 'category',
+            headerName: 'Category',
+            flex: 0.5,
+            minWidth: 120,
+            renderCell: (params) => (
+                categories.find(c => c.id === params.row.category_id)?.name || ''
+            )
+        },
+        {
+            field: 'selling_price',
+            headerName: 'Price',
+            flex: 0.5,
+            minWidth: 100,
+            renderCell: (params) => `$${params.row.selling_price}`
+        },
+        {
+            field: 'stock',
+            headerName: 'Stock',
+            flex: 0.5,
+            minWidth: 100
+        },
+        {
+            field: 'actions',
+            headerName: 'Actions',
+            flex: 0.5,
+            minWidth: 120,
+            sortable: false,
+            renderCell: (params) => (
+                <Box>
+                    <IconButton onClick={() => handleOpen({ type: "update", data: params.row })}>
+                        <EditIcon />
+                    </IconButton>
+                    <IconButton>
+                        <DeleteIcon />
+                    </IconButton>
+                </Box>
+            )
+        }
     ];
 
     return (
@@ -149,7 +241,7 @@ const Product = () => {
             <AppBar position="static" sx={{ background: 'white' }} elevation={0}>
                 <Box sx={{ display: 'flex', alignItems: 'center', px: 2, pt: 2 }}>
                     <Typography variant="h5" color={StyleColors.textDarkGray} sx={{ flexGrow: 1 }}>Product Management</Typography>
-                    <Button startIcon={<AddIcon />} onClick={handleOpen} sx={StyleColors.ButtonStyle}>New Product</Button>
+                    <Button startIcon={<AddIcon />} onClick={() => handleOpen({ type: "create" })} sx={StyleColors.ButtonStyle}>New Product</Button>
                 </Box>
             </AppBar>
 
@@ -165,49 +257,58 @@ const Product = () => {
             {loading ? (
                 <Box sx={{ display: 'flex', justifyContent: 'center', p: 4 }}><CircularProgress /></Box>
             ) : (
-                <Paper sx={{ m: 2 }} elevation={0}>
-                    <TableContainer>
-                        <Table>
-                            <TableHead>
-                                <TableRow>
-                                    <TableCell>Product</TableCell>
-                                    <TableCell>Code</TableCell>
-                                    <TableCell>Category</TableCell>
-                                    <TableCell>Price</TableCell>
-                                    <TableCell>Stock</TableCell>
-                                    <TableCell align="right">Actions</TableCell>
-                                </TableRow>
-                            </TableHead>
-                            <TableBody>
-                                {paginated.map(row => (
-                                    <TableRow key={row.product_id}>
-                                        <TableCell>
-                                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                                                <Avatar src={row.image_url} />
-                                                {row.product_name}
-                                            </Box>
-                                        </TableCell>
-                                        <TableCell>{row.code}</TableCell>
-                                        <TableCell>{categories.find(c => c.id === row.category_id)?.name}</TableCell>
-                                        <TableCell>${row.selling_price}</TableCell>
-                                        <TableCell>{row.stock}</TableCell>
-                                        <TableCell align="right">
-                                            <IconButton><VisibilityIcon /></IconButton>
-                                            <IconButton><EditIcon /></IconButton>
-                                            <IconButton><DeleteIcon /></IconButton>
-                                        </TableCell>
-                                    </TableRow>
-                                ))}
-                            </TableBody>
-                        </Table>
-                    </TableContainer>
-                    <TablePagination
-                        component="div"
-                        count={filtered.length}
-                        page={page}
-                        onPageChange={handleChangePage}
-                        rowsPerPage={rowsPerPage}
-                        onRowsPerPageChange={handleChangeRowsPerPage}
+                <Paper sx={{ m: 2, height: 600 }} elevation={0}>
+                    <DataGrid
+                        rows={filteredProducts}
+                        columns={columns}
+                        pageSize={rowsPerPage}
+                        rowsPerPageOptions={[5, 10, 25]}
+                        onPageSizeChange={(newPageSize) => setRowsPerPage(newPageSize)}
+                        pagination
+                        disableSelectionOnClick
+                        getRowId={(row) => row.product_id}
+                        sx={{
+                            '& .MuiDataGrid-root': {
+                                border: 'none',
+                                outline: 'none',
+                            },
+                            '& .MuiDataGrid-cell': {
+                                borderBottom: 'none',
+                            },
+                            '& .MuiDataGrid-columnHeaders': {
+                                backgroundColor: '#f5f5f5',
+                                borderBottom: 'none',
+                            },
+                            '& .MuiDataGrid-virtualScroller': {
+                                backgroundColor: '#ffffff',
+                            },
+                            '& .MuiDataGrid-footerContainer': {
+                                borderTop: 'none',
+                                backgroundColor: '#f5f5f5',
+                            },
+
+                            // remove focus outlines everywhere
+                            '& .MuiDataGrid-cell:focus, & .MuiDataGrid-cell:focus-within': {
+                                outline: 'none',
+                            },
+                            '& .MuiDataGrid-columnHeader:focus, & .MuiDataGrid-columnHeader:focus-within': {
+                                outline: 'none',
+                            },
+                            '& .MuiDataGrid-root:focus': {
+                                outline: 'none',
+                            },
+                            '& .MuiDataGrid-row:hover': {
+                                cursor: 'pointer',
+                                backgroundColor: StyleColors.appColorLv2,
+                            },
+                            '& .MuiDataGrid-row.Mui-selected': {
+                                backgroundColor: StyleColors.appColorLv1,
+                            },
+                            // if you still want a hover effect:
+                            '& .MuiDataGrid-row.Mui-selected:hover': {
+                                backgroundColor: StyleColors.appColorLv1,  // a lighter pink on hover
+                            }
+                        }}
                     />
                 </Paper>
             )}
@@ -300,12 +401,18 @@ const Product = () => {
                                 onChange={handleChange}
                             /> */}
 
-                            <POSFormTextField
+
+                            <POSFormImageUpload
                                 name="image_url"
-                                label="Image URL"
-                                prefixIcon={<ImageIcon />}
+                                label="Upload Image"
+                                uploadUrl="https://api.cloudinary.com/v1_1/dml2cm2bm/image/upload"
+                                uploadPreset="NurakPOS"
                                 value={formData.image_url}
-                                onChange={handleChange}
+                                onUpload={(e) => {
+                                    setFormData(prev => ({ ...prev, ['image_url']: e }));
+                                    if (errors[name]) setErrors(prev => ({ ...prev, ['image_url']: e }));
+                                }}
+                                onError={(err) => null}
                             />
 
                             <POSFormTextField

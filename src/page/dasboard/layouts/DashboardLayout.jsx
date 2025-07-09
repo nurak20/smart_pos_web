@@ -48,17 +48,20 @@ import {
     Warning as WarningIcon,
     AccountCircle as AccountCircleIcon,
     Settings as SettingsIcon,
-    Logout as LogoutIcon
+    Logout as LogoutIcon,
+    CategoryRounded
 } from '@mui/icons-material';
 import { theme } from '../Dashboard';
 import { StyleColors } from '../../../util/helper/Extension';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../../../context/AuthProvider';
 
 const DashboardLayout = ({ children }) => {
     const [sidebarOpen, setSidebarOpen] = useState(true);
     const [anchorEl, setAnchorEl] = useState(null);
     const [activeItem, setActiveItem] = useState('Overview');
     const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+    const { logout, user } = useAuth();
 
     const drawerWidth = 280;
 
@@ -182,8 +185,8 @@ const DashboardLayout = ({ children }) => {
                     </ListItemIcon>
                     <ListItemText>Settings</ListItemText>
                 </MenuItem>
-                <MenuItem onClick={handleMenuClose}>
-                    <ListItemIcon>
+                <MenuItem onClick={() => logout()} sx={{ color: 'red' }}>
+                    <ListItemIcon sx={{ color: 'red' }}>
                         <LogoutIcon fontSize="small" />
                     </ListItemIcon>
                     <ListItemText>Logout</ListItemText>
@@ -278,9 +281,8 @@ const DashboardLayout = ({ children }) => {
                                 aria-controls="user-menu"
                                 aria-haspopup="true"
                             >
-                                <Avatar sx={{ width: 32, height: 32 }}>
-                                    <PersonIcon />
-                                </Avatar>
+                                <Avatar sx={{ width: 32, height: 32 }} src={user?.image_url} />
+
                             </IconButton>
                         </Box>
                     </Toolbar>
@@ -298,6 +300,7 @@ const DashboardLayout = ({ children }) => {
 const navigationItems = [
     { text: 'Overview', icon: DashboardIcon, path: '/' },
     { text: 'Product', icon: InventoryIcon, path: '/product' },
+    { text: 'Categories', icon: CategoryRounded, path: '/category' },
     { text: 'Reports', icon: ReportsIcon, path: '/reports' },
 ];
 

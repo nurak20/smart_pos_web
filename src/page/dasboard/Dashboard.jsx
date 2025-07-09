@@ -2,53 +2,10 @@ import React, { useState, useMemo } from 'react';
 import {
     ThemeProvider,
     CssBaseline,
-    Box,
-    Drawer,
-    AppBar,
-    Toolbar,
-    Typography,
-    List,
-    ListItemButton,
-    ListItemIcon,
-    ListItemText,
-    IconButton,
-    Avatar,
-    Menu,
-    MenuItem,
-    Badge,
-    useMediaQuery,
-    Container,
-    Grid,
-    Card,
-    CardContent,
-    Table,
-    TableBody,
-    TableCell,
-    TableContainer,
-    TableHead,
-    TableRow,
-    TablePagination,
-    Paper,
-    Chip,
-    LinearProgress,
+
     createTheme
 } from '@mui/material';
-import {
-    Menu as MenuIcon,
-    Dashboard as DashboardIcon,
-    PointOfSale as SalesIcon,
-    Inventory as InventoryIcon,
-    Assessment as ReportsIcon,
-    Notifications as NotificationsIcon,
-    Person as PersonIcon,
-    TrendingUp as TrendingUpIcon,
-    Receipt as ReceiptIcon,
-    Assignment as AssignmentIcon,
-    Warning as WarningIcon,
-    AccountCircle as AccountCircleIcon,
-    Settings as SettingsIcon,
-    Logout as LogoutIcon
-} from '@mui/icons-material';
+
 import { Overview } from './layouts/Overview';
 import DashboardLayout from './layouts/DashboardLayout';
 
