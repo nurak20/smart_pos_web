@@ -136,7 +136,7 @@ const Category = () => {
     ];
 
     return (
-        <Box sx={{ background: 'white' }}>
+        <Box sx={{ background: 'white', borderRadius: '12px', overflow: 'hidden' }}>
             <AppBar position="static" sx={{ background: 'white' }} elevation={0}>
                 <Box sx={{ display: 'flex', alignItems: 'center', px: 2, pt: 2 }}>
                     <Typography variant="h5" color={StyleColors.textDarkGray} sx={{ flexGrow: 1 }}>Category Management</Typography>

@@ -236,8 +236,8 @@ const Product = () => {
     ];
 
     return (
-        <Box sx={{ background: 'white', borderRadius: '10px', pb: 2 }}>
-            <AppBar position="static" sx={{ background: 'white' }} elevation={0}>
+        <Box sx={{ background: 'white', pb: 2, borderRadius: '12px', overflow: 'hidden' }}>
+            <AppBar position="static" sx={{ background: 'white', }} elevation={0}>
                 <Box sx={{ display: 'flex', alignItems: 'center', px: 2, pt: 2 }}>
                     <Typography variant="h5" color={StyleColors.textDarkGray} sx={{ flexGrow: 1 }}>Product Management</Typography>
                     <Button startIcon={<AddIcon />} onClick={() => handleOpen({ type: "create" })} sx={StyleColors.ButtonStyle}>New Product</Button>
