@@ -23,7 +23,8 @@ import {
     Snackbar,
     Alert,
     CircularProgress,
-    Paper
+    Paper,
+    Avatar
 } from '@mui/material';
 import {
     Add as AddIcon,
@@ -43,9 +44,8 @@ import LabelIcon from '@mui/icons-material/Label';
 import CodeIcon from '@mui/icons-material/Code';
 import ImageIcon from '@mui/icons-material/Image';
 import DescriptionIcon from '@mui/icons-material/Description';
+import { ProductService } from './Service';
 
-const API_GET = 'v1/products';
-const API_POST = 'https://api.txteams.net/api/v1/products';
 
 const Product = () => {
     // State hooks
@@ -73,19 +73,18 @@ const Product = () => {
 
     // Fetch products
     useEffect(() => {
-        const fetchProducts = async () => {
-            try {
-                const res = await axiosGET('v1/products');
-                console.log(res.data);
-                setProducts(res.data || []);
-            } catch (err) {
-                setNotify({ open: true, message: 'Failed to load products', severity: 'error' });
-            } finally {
-                setLoading(false);
-            }
-        };
-        fetchProducts();
+        getProductListing();
     }, []);
+
+    const getProductListing = async () => {
+        try {
+            const res = await ProductService.getProducts();
+            setProducts(res);
+        } catch (err) {
+        } finally {
+            setLoading(false);
+        }
+    };
 
     // Handlers
     const handleOpen = () => setOpenDialog(true);
@@ -117,17 +116,16 @@ const Product = () => {
         try {
             const payload = {
                 ...formData,
+                code: new Date().getTime(),
+                warehouse_id: '',
                 created_by: 'c161a77f-94d2-4ea5-a34f-15cf43f61eda',
                 updated_by: 'c161a77f-94d2-4ea5-a34f-15cf43f61eda',
             };
-            await axios.post(API_POST, payload);
-            setNotify({ open: true, message: 'Product created', severity: 'success' });
-            // Reload list
-            const { data } = await axios.get(API_GET);
-            setProducts(data.data || []);
+            const res = await ProductService.createNewProduct({ payload: payload });
+            getProductListing();
             handleClose();
         } catch (err) {
-            setNotify({ open: true, message: 'Creation failed', severity: 'error' });
+
         }
     };
 
@@ -183,7 +181,12 @@ const Product = () => {
                             <TableBody>
                                 {paginated.map(row => (
                                     <TableRow key={row.product_id}>
-                                        <TableCell>{row.product_name}</TableCell>
+                                        <TableCell>
+                                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                                                <Avatar src={row.image_url} />
+                                                {row.product_name}
+                                            </Box>
+                                        </TableCell>
                                         <TableCell>{row.code}</TableCell>
                                         <TableCell>{categories.find(c => c.id === row.category_id)?.name}</TableCell>
                                         <TableCell>${row.selling_price}</TableCell>
@@ -288,22 +291,14 @@ const Product = () => {
                                 helperText={errors.stock}
                                 required
                             />
-
-                            <POSFormTextField
-                                name="brand_name"
-                                label="Brand Name"
-                                prefixIcon={<LabelIcon />}
-                                value={formData.brand_name}
-                                onChange={handleChange}
-                            />
-
+                            {/* 
                             <POSFormTextField
                                 name="group_code"
                                 label="Group Code"
                                 prefixIcon={<CodeIcon />}
                                 value={formData.group_code}
                                 onChange={handleChange}
-                            />
+                            /> */}
 
                             <POSFormTextField
                                 name="image_url"
