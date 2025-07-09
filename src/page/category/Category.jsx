@@ -41,6 +41,7 @@ import DescriptionIcon from '@mui/icons-material/Description';
 import ImageIcon from '@mui/icons-material/Image';
 import ToggleOnIcon from '@mui/icons-material/ToggleOn';
 import { CategoryService } from './CategoryService';
+import POSFormImageUpload from '../../components/file_upload';
 
 const API_GET = 'v1/categories';
 const API_POST = 'https://api.txteams.net/api/v1/categories';
@@ -258,14 +259,18 @@ const Category = () => {
                                 helperText={errors.description}
                                 required
                             />
-
-                            <POSFormTextField
+                            <POSFormImageUpload
                                 name="image"
-                                label="Image URL"
-                                prefixIcon={<ImageIcon />}
+                                label="Upload Image"
+                                uploadPreset="NurakPOS"
                                 value={formData.image}
-                                onChange={handleChange}
+                                onUpload={(e) => {
+                                    setFormData(prev => ({ ...prev, ['image']: e }));
+                                    if (errors[name]) setErrors(prev => ({ ...prev, ['image']: e }));
+                                }}
+                                onError={(err) => null}
                             />
+
                         </Box>
                     </DialogContent>
                     <DialogActions sx={{ p: 2 }}>
