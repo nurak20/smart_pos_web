@@ -264,6 +264,7 @@ const Product = () => {
                         rowsPerPageOptions={[5, 10, 25]}
                         onPageSizeChange={(newPageSize) => setRowsPerPage(newPageSize)}
                         pagination
+                        rowHeight={70}
                         disableSelectionOnClick
                         getRowId={(row) => row.product_id}
                         sx={{
@@ -274,6 +275,8 @@ const Product = () => {
                             /* remove cell bottom borders */
                             '& .MuiDataGrid-cell': {
                                 borderBottom: 'none',
+
+
                             },
                             /* remove header bottom border */
                             '& .MuiDataGrid-columnHeaders': {
@@ -295,6 +298,7 @@ const Product = () => {
                             },
                             '& .MuiDataGrid-row:hover': {
                                 cursor: 'pointer',
+
                                 backgroundColor: 'rgba(166, 166, 166, 0.04)',
                             },
                             '& .MuiDataGrid-row.Mui-selected': {
