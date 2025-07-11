@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect, useRef } from 'react';
 import Cookies from 'js-cookie';
 import {
     AppBar,
@@ -51,16 +51,17 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthProvider';
 import { axiosGET, axiosPOST } from '../service/ApiService';
 import './global.css';
+import { StyleColors } from '../util/helper/Extension';
 
 // Product Service Provider - Clean, professional code structure
 class ProductService {
     static categories = [
-        { id: 'all', name: 'All Products', color: '#2196f3' },
-        { id: 'beverages', name: 'Beverages', color: '#2196f3' },
-        { id: 'snacks', name: 'Snacks', color: '##2196f3' },
-        { id: 'electronics', name: 'Electronics', color: '#2196f3' },
-        { id: 'clothing', name: 'Clothing', color: '#2196f3' },
-        { id: 'books', name: 'Books', color: '#2196f3' }
+        { id: 'all', name: 'All Products', color: '#825567' },
+        { id: 'beverages', name: 'Beverages', color: '#825567' },
+        { id: 'snacks', name: 'Snacks', color: '#825567' },
+        { id: 'electronics', name: 'Electronics', color: '#825567' },
+        { id: 'clothing', name: 'Clothing', color: '#825567' },
+        { id: 'books', name: 'Books', color: '#825567' }
     ];
 
     static getCategories() {
@@ -98,7 +99,7 @@ class PaymentService {
     static paymentMethods = [
         { 
             id: 'cash', 
-            name: 'Cash', 
+            name: 'Cash',
             icon: '💵', 
             src: "https://www.usatoday.com/gcdn/-mm-/e76b3f8780406e2332171b90051c86d67cb0349b/c=0-85-2122-1282/local/-/media/USATODAY/USATODAY/2014/09/04/1409858217000-492529263.jpg?width=2122&height=1197&fit=crop&format=pjpg&auto=webp" 
         },
@@ -136,6 +137,8 @@ export default function POSAdminSystem() {
     const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
     const { user } = useAuth();
+    const posContainerRef = useRef(null);
+
 
     // Load cart from cookies on initial render
     useEffect(() => {
@@ -375,12 +378,7 @@ export default function POSAdminSystem() {
     }
 
     return (
-        <Box sx={{ minHeight: '100vh', width: '100%', position: 'fixed', top: 0 }}>
-            {/* Header */}
-            <AppBar position="static" >
-                <Toolbar>                    
-                </Toolbar>
-            </AppBar>
+        <Box ref={posContainerRef} sx={{ minHeight: '100vh', width: '100%', position: 'fixed', top: 0,overscrollBehavior: 'none', }}>
             <Container maxWidth="xl" sx={{ py: { xs: 1, md: 2 }, px: { xs: 1, md: 3 } }}>
                 <Grid container spacing={{ xs: 1, md: 3 }}>
                     {/* Left Panel - Products */}
@@ -421,10 +419,10 @@ export default function POSAdminSystem() {
                                             px: 3,
                                             borderRadius: "8px",
                                             whiteSpace: "nowrap",
-                                            
-                                            borderColor: category.color,
-                                            minWidth: "fit-content",
-                                            flexShrink: 0
+                                            borderColor: selectedCategory === category.id ? StyleColors.appColorLv7 : "grey.300",                                           
+                                            bgcolor: selectedCategory === category.id ? '#99697d' : StyleColors.appColorLv2,
+                                            color: selectedCategory === category.id ? 'white' : '#99697d',
+                                            flexShrink: 0                                            
                                         }}
                                     >
                                         {category.name}
@@ -468,14 +466,15 @@ export default function POSAdminSystem() {
                                         <Card
                                             elevation={0}
                                             sx={{
+                                                borderRadius: "10px",
                                                 height: "100%",
                                                 cursor: "pointer",
                                                 transition: "transform 0.2s, box-shadow 0.2s",
-                                                border: "1px solid",
-                                                borderColor: "grey.200",
+                                                border: "none",
+                                                borderColor: "grey.50",
                                                 "&:hover": {
                                                     transform: "translateY(-2px)",
-                                                    boxShadow: 3
+                                                    boxShadow: "rgba(99, 99, 99, 0.2) 0px 2px 8px 0px;"
                                                 },
                                                 "&:active": {
                                                     transform: "translateY(0px)"
@@ -509,26 +508,6 @@ export default function POSAdminSystem() {
                                                 >
                                                     {product.product_name}
                                                 </Typography>
-                                                <Typography
-                                                    variant="h6"
-                                                    color="success.main"
-                                                    sx={{
-                                                        fontSize: { xs: "0.875rem", sm: "1rem", md: "1.1rem" },
-                                                        fontWeight: "bold"
-                                                    }}
-                                                >
-                                                    ${parseFloat(product.selling_price || 0).toFixed(2)}
-                                                </Typography>
-                                                <Typography
-                                                    variant="caption"
-                                                    color="text.secondary"
-                                                    sx={{ 
-                                                        fontSize: { xs: "0.65rem", md: "0.75rem" },
-                                                        display: "block"
-                                                    }}
-                                                >
-                                                    Stock: {product.stock || 0}
-                                                </Typography>
                                             </CardContent>
                                         </Card>
                                     </Grid>
@@ -561,7 +540,7 @@ export default function POSAdminSystem() {
                                     alignItems: "center" 
                                 }}
                             >
-                                <ShoppingCart sx={{ mr: 1 }} />
+                                <ShoppingCart sx={{ mr: 1}} />
                                 {Translate({ 
                                     km: `បញ្ជីលក់ (${totalItems} ទំនិញ)`, 
                                     en: `Sell List (${totalItems} items)` 
@@ -656,8 +635,9 @@ export default function POSAdminSystem() {
                                 sx={{
                                     mt: 2,
                                     py: 3,
-                                  
+                                    bgcolor: '#825567',
                                     color: "white"
+                                    
                                 }}
                                 startIcon={<Payment />}
                             >
@@ -708,7 +688,7 @@ export default function POSAdminSystem() {
                         onClick={() => setPaymentDialog(true)}
                         disabled={sellList.length === 0}
                         sx={{
-                            
+                            bgcolor: '#825567',
                             color: "white"
                         }}
                         startIcon={<Payment />}
@@ -724,15 +704,14 @@ export default function POSAdminSystem() {
                 onClose={() => setPaymentDialog(false)}
                 fullWidth
                 maxWidth="sm"
-                fullScreen={isMobile}
             >
                 <DialogTitle sx={{ display: 'flex', alignItems: 'center' }}>
-                    <Payment sx={{ mr: 1 }} />
+                    <Payment sx={{ mr: 1}} />
                     {Translate({ km: 'ការទូទាត់', en: 'Payment' })}
                 </DialogTitle>
                 <DialogContent dividers>
                     <Box sx={{ mb: 3 }}>
-                        <Typography variant="h6" sx={{ mb: 1 }}>
+                        <Typography variant="h6" sx={{ mb: 1  }}>
                             {Translate({ km: 'ធាតុក្នុងបញ្ជី', en: 'Items in Cart' })}
                         </Typography>
                         <List dense sx={{ maxHeight: 200, overflow: 'auto' }}>
@@ -764,7 +743,7 @@ export default function POSAdminSystem() {
                     </Box>
 
                     <Box>
-                        <Typography variant="h6" sx={{ mb: 1 }}>
+                        <Typography variant="h6" sx={{ mb: 1, }}>
                             {Translate({ km: 'វិធីសារពើការទូទាត់', en: 'Payment Method' })}
                         </Typography>
                         <Grid container spacing={2}>
@@ -776,10 +755,10 @@ export default function POSAdminSystem() {
                                             p: 2,
                                             cursor: 'pointer',
                                             borderColor: selectedPaymentMethod.includes(method.id)
-                                                ? 'primary.main'
+                                                ? '#99697d'
                                                 : 'divider',
                                             backgroundColor: selectedPaymentMethod.includes(method.id)
-                                                ? 'primary.light'
+                                                ? '#99697d'
                                                 : 'background.paper',
                                             '&:hover': {
                                                 borderColor: 'primary.main'
@@ -833,7 +812,7 @@ export default function POSAdminSystem() {
                         onClick={processPayment}
                         disabled={selectedPaymentMethod.length === 0 || processingPayment}
                         sx={{
-                           
+                            bgcolor: '#825567',
                             color: 'white',
                             minWidth: 120
                         }}

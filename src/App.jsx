@@ -14,8 +14,8 @@ const App = () => {
   }
   return (
     <>
-      <Dashboard />
-      {/* <POSAdminSystem /> */}
+      {/* <Dashboard /> */}
+      <POSAdminSystem />
     </>
   )
 }
