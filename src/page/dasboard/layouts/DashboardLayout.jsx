@@ -303,6 +303,8 @@ const navigationItems = [
     { text: 'Categories', icon: CategoryRounded, path: '/category' },
     { text: 'Reports', icon: ReportsIcon, path: '/reports' },
     { text: 'Terminal', icon: SalesIcon, path: '/pos' },
+    { text: 'Orders', icon: ReceiptIcon, path: '/order' },
+    { text: 'Product Detail', icon: AssignmentIcon, path: '/productd' },
 ];
 
 
