@@ -4,6 +4,7 @@ export const StyleColors = {
     componentsHover: 'rgb(179, 56, 103)',
     textDarkGray: 'rgb(41, 40, 40)',
     textGray: 'rgb(119, 118, 118)',
+
     appColorLv1: '#f9f6f8',
     appColorLv2: '#f4eff2',
     appColorLv3: '#ebdfe6',
@@ -14,9 +15,10 @@ export const StyleColors = {
     appColorLv8: '#6c4855',
     appColorLv9: '#5c3f4b',
     appColorLv10: '#352229',
+
     ButtonStyle: {
         background: '#6c4855',
-        borderRadius: '4px',
+        borderRadius: '8px',
         fontSize: '16px',
         fontWeight: '400',
         maxHeight: '47px',
@@ -95,7 +97,52 @@ export const StyleColors = {
                 boxShadow: 'none !important',
             },
         },
-    }
+    },
+    tableStyle: {
+        borderRadius: 1,
+
+        border: 'none',
+        '& .MuiDataGrid-row': {
+            borderBottom: '1px dashed rgb(234, 234, 234)',
+        },
+        '& .MuiDataGrid-cell': {
+            borderTop: '0px !important',
+            borderBottom: '0px !important',
+            borderRight: 'none',
+        },
+        '& .MuiDataGrid-row .MuiDataGrid-cell': {
+            borderBottom: 'none !important',
+        },
+        '& .MuiDataGrid-columnHeaders': {
+            borderBottom: '0px !important',
+            backgroundColor: '#f5f5f5',
+        },
+        '& .MuiDataGrid-columnSeparator': {
+            display: 'none',
+        },
+        '& .MuiDataGrid-footerContainer': {
+            borderTop: 'none',
+            backgroundColor: '#f5f5f5',
+        },
+        '& .MuiDataGrid-virtualScroller': {
+            backgroundColor: '#ffffff',
+        },
+        '& .MuiDataGrid-row:hover': {
+            cursor: 'pointer',
+            backgroundColor: 'rgba(166, 166, 166, 0.04)',
+        },
+        '& .MuiDataGrid-row.Mui-selected': {
+            backgroundColor: '#f9f6f8',
+        },
+        '& .MuiDataGrid-row.Mui-selected:hover': {
+            backgroundColor: '#f9f6f8',
+        },
+        '& .MuiDataGrid-cell:focus, & .MuiDataGrid-cell:focus-within, & .MuiDataGrid-columnHeader:focus': {
+            outline: 'none',
+        },
+    },
+
+
 
 };
 

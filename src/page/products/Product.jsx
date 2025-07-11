@@ -224,10 +224,10 @@ const Product = () => {
             sortable: false,
             renderCell: (params) => (
                 <Box>
-                    <IconButton color='success' onClick={() => handleOpen({ type: "update", data: params.row })}>
+                    <IconButton color='default' onClick={() => handleOpen({ type: "update", data: params.row })} sx={{ bgcolor: StyleColors.appColorLv1 }} size='small'>
                         <EditIcon />
                     </IconButton>
-                    <IconButton color='error'>
+                    <IconButton color='default' sx={{ bgcolor: StyleColors.appColorLv1 }} size='small' className='ms-2'>
                         <DeleteIcon />
                     </IconButton>
                 </Box>
@@ -267,51 +267,7 @@ const Product = () => {
                         rowHeight={70}
                         disableSelectionOnClick
                         getRowId={(row) => row.product_id}
-                        sx={{
-
-                            borderRadius: 0,
-                            /* remove outer border */
-                            border: 'none',
-                            /* remove cell bottom borders */
-                            '& .MuiDataGrid-cell': {
-                                borderBottom: 'none',
-
-
-                            },
-                            /* remove header bottom border */
-                            '& .MuiDataGrid-columnHeaders': {
-                                borderBottom: 'none',
-                                backgroundColor: '#f5f5f5',
-                            },
-                            /* hide the little vertical separators between columns */
-                            '& .MuiDataGrid-columnSeparator': {
-                                display: 'none',
-                            },
-                            /* remove footer top border */
-                            '& .MuiDataGrid-footerContainer': {
-                                borderTop: 'none',
-                                backgroundColor: '#f5f5f5',
-                            },
-                            /* rest of your styling… */
-                            '& .MuiDataGrid-virtualScroller': {
-                                backgroundColor: '#ffffff',
-                            },
-                            '& .MuiDataGrid-row:hover': {
-                                cursor: 'pointer',
-
-                                backgroundColor: 'rgba(166, 166, 166, 0.04)',
-                            },
-                            '& .MuiDataGrid-row.Mui-selected': {
-                                backgroundColor: StyleColors.appColorLv1,
-                            },
-                            '& .MuiDataGrid-row.Mui-selected:hover': {
-                                backgroundColor: StyleColors.appColorLv1,
-                            },
-                            /* remove focus outlines */
-                            '& .MuiDataGrid-cell:focus, & .MuiDataGrid-cell:focus-within, & .MuiDataGrid-columnHeader:focus': {
-                                outline: 'none',
-                            },
-                        }}
+                        sx={StyleColors.tableStyle}
                     />
                 </Paper>
             )}
