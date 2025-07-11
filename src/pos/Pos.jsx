@@ -378,54 +378,9 @@ export default function POSAdminSystem() {
         <Box sx={{ minHeight: '100vh', width: '100%', position: 'fixed', top: 0 }}>
             {/* Header */}
             <AppBar position="static" >
-                <Toolbar sx={{ minHeight: { xs: 56, sm: 64 }, display: 'flex', justifyContent: 'space-between' }}>
-                    <IconButton 
-                        onClick={() => navigate(-1)} 
-                        sx={{ color: "white" }}
-                    >
-                        <PowerSettingsNew />
-                    </IconButton>
-
-                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                        {/* Mobile: Show cart badge and payment button */}
-                        <Badge 
-                            badgeContent={totalItems} 
-                            color="error" 
-                            sx={{ display: { xs: 'flex', md: 'none' } }}
-                        >
-                            <IconButton 
-                                color="inherit" 
-                                onClick={() => setPaymentDialog(true)}
-                            >
-                                <Payment sx={{ fontSize: { xs: 20, md: 24 } }} />
-                            </IconButton>
-                        </Badge>
-
-                        {/* Desktop: Show full header items */}
-                        <Box sx={{ display: { xs: 'none', md: 'flex' }, alignItems: 'center' }}>
-                            <Box sx={{ px: 2 }}>
-                                {/* <LanguageSwitcher isShowBorder={true} /> */}
-                            </Box>
-                            <Avatar
-                                src={user.image_url}
-                                sx={{ 
-                                    width: { xs: 20, md: 25 }, 
-                                    height: { xs: 20, md: 25 }, 
-                                    border: '1px solid white', 
-                                    ml: 1 
-                                }}
-                            />
-                            <Typography 
-                                variant="body2" 
-                                sx={{ px: 2, display: { xs: 'none', lg: 'block' } }}
-                            >
-                                {user.first_name} {user.last_name}
-                            </Typography>
-                        </Box>
-                    </Box>
+                <Toolbar>                    
                 </Toolbar>
             </AppBar>
-
             <Container maxWidth="xl" sx={{ py: { xs: 1, md: 2 }, px: { xs: 1, md: 3 } }}>
                 <Grid container spacing={{ xs: 1, md: 3 }}>
                     {/* Left Panel - Products */}
