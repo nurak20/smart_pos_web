@@ -125,17 +125,16 @@ export const theme = createTheme({
 
 // Mock Data
 
-
-// Main App Component
-const Dashboard = () => {
-    return (
-        <ThemeProvider theme={theme}>
-            <CssBaseline />
-            <DashboardLayout>
-                <Overview />
-            </DashboardLayout>
-        </ThemeProvider>
-    );
+// src/page/dashboard/Dashboard.jsx
+const Dashboard = ({ setIsTerminalFullScreen }) => {
+  return (
+    <ThemeProvider theme={theme}>
+      <CssBaseline />
+      <DashboardLayout setIsTerminalFullScreen={setIsTerminalFullScreen}>
+        <Overview />
+      </DashboardLayout>
+    </ThemeProvider>
+  );
 };
 
 export default Dashboard;

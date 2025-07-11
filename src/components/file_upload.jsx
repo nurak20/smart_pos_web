@@ -4,6 +4,7 @@ import { FormControl, TextField, InputAdornment, Avatar, CircularProgress } from
 import { CloudUpload as UploadIcon } from '@mui/icons-material';
 import { StyleColors } from '../util/helper/Extension';
 
+
 /**
  * POSFormImageUpload
  *
