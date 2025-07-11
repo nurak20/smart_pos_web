@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
 import {
     AppBar,
     Box,
@@ -25,10 +24,8 @@ import {
     Close as CloseIcon,
     Search as SearchIcon,
     Edit as EditIcon,
-    Delete as DeleteIcon,
-    Visibility as VisibilityIcon
+    Delete as DeleteIcon
 } from '@mui/icons-material';
-import { axiosGET } from '../../service/ApiService';
 import { StyleColors } from '../../util/helper/Extension';
 import POSFormTextField from '../../components/pos_text_field';
 import CategoryIcon from '@mui/icons-material/Category';
@@ -42,13 +39,11 @@ import { ProductService } from './Service';
 import { CategoryService } from '../category/CategoryService';
 import POSFormImageUpload from '../../components/file_upload';
 
-
 const Product = () => {
     // State hooks
     const [products, setProducts] = useState([]);
     const [loading, setLoading] = useState(true);
     const [openDialog, setOpenDialog] = useState(false);
-    const [page, setPage] = useState(0);
     const [rowsPerPage, setRowsPerPage] = useState(10);
     const [search, setSearch] = useState('');
     const [isCreateNew, setIsCreateNew] = useState(true);
@@ -63,14 +58,17 @@ const Product = () => {
         warehouse_id: '',
         image_url: '',
         group_code: '',
-        brand_name: ''
+        brand_name: '',
+        barcode: ''
     });
     const [errors, setErrors] = useState({});
-    const [notify, setNotify] = useState({ open: false, message: '', severity: 'success' });
+    const [notify, setNotify] = useState({ open: false, message: '', severity: 'success', duration: 6000 });
+    const [categories, setCategories] = useState([]);
 
-    // Fetch products
+    // Fetch products and categories
     useEffect(() => {
         getProductListing();
+        getCategoriesListing();
     }, []);
 
     const getProductListing = async () => {
@@ -78,17 +76,32 @@ const Product = () => {
             const res = await ProductService.getProducts();
             setProducts(res);
         } catch (err) {
+            console.error('Error fetching products:', err);
+            showNotification('Failed to fetch products', 'error');
         } finally {
             setLoading(false);
         }
     };
 
+    const getCategoriesListing = async () => {
+        try {
+            const res = await CategoryService.getCategories();
+            setCategories(res);
+        } catch (err) {
+            console.error('Error fetching categories:', err);
+            showNotification('Failed to fetch categories', 'error');
+        }
+    };
+
+    // Enhanced notification helper
+    const showNotification = (message, severity, duration = 6000) => {
+        setNotify({ open: true, message, severity, duration });
+    };
+
     // Handlers
-    // inside your component, update handleOpen:
     const handleOpen = ({ type = "create", data = null }) => {
         setIsCreateNew(type === "create");
         if (type === "update" && data) {
-            // seed the form with the product you clicked
             setFormData({
                 category_id: data.category_id,
                 code: data.code,
@@ -101,17 +114,33 @@ const Product = () => {
                 image_url: data.image_url,
                 group_code: data.group_code,
                 brand_name: data.brand_name,
-                // keep the id handy for the update call
+                barcode: data.barcode || '',
                 product_id: data.product_id,
             });
         }
         setOpenDialog(true);
     };
 
-
     const handleClose = () => {
         setOpenDialog(false);
-        setFormData({ category_id: '', code: '', product_name: '', cost_price: '', selling_price: '', stock: '', description: '', warehouse_id: '', image_url: '', group_code: '', brand_name: '' });
+        resetForm();
+    };
+
+    const resetForm = () => {
+        setFormData({
+            category_id: '',
+            code: '',
+            product_name: '',
+            cost_price: '',
+            selling_price: '',
+            stock: '',
+            description: '',
+            warehouse_id: '',
+            image_url: '',
+            group_code: '',
+            brand_name: '',
+            barcode: ''
+        });
         setErrors({});
     };
 
@@ -138,41 +167,27 @@ const Product = () => {
         try {
             const payload = {
                 ...formData,
-                code: new Date().getTime(),
+                code: formData.code || new Date().getTime(),
                 warehouse_id: null,
                 created_by: 'c161a77f-94d2-4ea5-a34f-15cf43f61eda',
                 updated_by: 'c161a77f-94d2-4ea5-a34f-15cf43f61eda',
             };
+            
             if (isCreateNew) {
-                await ProductService.createNewProduct({ payload: payload });
+                await ProductService.createNewProduct({ payload });
+                showNotification('Product created successfully', 'success');
             } else {
-                await ProductService.updateProduct({ payload: payload, productId: formData.product_id });
+                await ProductService.updateProduct({ payload, productId: formData.product_id });
+                showNotification('Product updated successfully', 'success');
             }
+            
             getProductListing();
             handleClose();
         } catch (err) {
-
+            console.error('Error saving product:', err);
+            showNotification('Failed to save product', 'error');
         }
     };
-
-    // Sample categories
-    const [categories, setCategories] = useState([]);
-    useEffect(() => {
-        const getCategoriesListing = async () => {
-            try {
-                const res = await CategoryService.getCategories();
-                setCategories(res)
-            } catch (err) {
-                console.log(err)
-            }
-        }
-        getCategoriesListing();
-    }, [])
-
-    // Filtered data for DataGrid
-    const filteredProducts = products.filter(p =>
-        p.product_name.toLowerCase().includes(search.toLowerCase())
-    );
 
     // DataGrid columns configuration
     const columns = [
@@ -193,6 +208,12 @@ const Product = () => {
             headerName: 'Code',
             flex: 0.5,
             minWidth: 120
+        },
+        {
+            field: 'barcode',
+            headerName: 'Barcode',
+            flex: 0.5,
+            minWidth: 150
         },
         {
             field: 'category',
@@ -239,26 +260,39 @@ const Product = () => {
         <Box sx={{ background: 'white', borderRadius: '10px', pb: 2 }}>
             <AppBar position="static" sx={{ background: 'white' }} elevation={0}>
                 <Box sx={{ display: 'flex', alignItems: 'center', px: 2, pt: 2 }}>
-                    <Typography variant="h5" color={StyleColors.textDarkGray} sx={{ flexGrow: 1 }}>Product Management</Typography>
-                    <Button startIcon={<AddIcon />} onClick={() => handleOpen({ type: "create" })} sx={StyleColors.ButtonStyle}>New Product</Button>
+                    <Typography variant="h5" color={StyleColors.textDarkGray} sx={{ flexGrow: 1 }}>
+                        Product Management
+                    </Typography>
+                    <Button 
+                        startIcon={<AddIcon />} 
+                        onClick={() => handleOpen({ type: "create" })} 
+                        sx={StyleColors.ButtonStyle}
+                    >
+                        New Product
+                    </Button>
                 </Box>
             </AppBar>
 
-            {/* <Box sx={{ m: 2, display: 'flex', justifyContent: 'flex-end' }}>
+            <Box sx={{ m: 2, display: 'flex', justifyContent: 'flex-end' }}>
                 <TextField
-                    placeholder="Search…"
+                    placeholder="Search by name or barcode..."
                     value={search}
                     onChange={e => setSearch(e.target.value)}
                     InputProps={{ startAdornment: <SearchIcon /> }}
                 />
-            </Box> */}
+            </Box>
 
             {loading ? (
-                <Box sx={{ display: 'flex', justifyContent: 'center', p: 4 }}><CircularProgress /></Box>
+                <Box sx={{ display: 'flex', justifyContent: 'center', p: 4 }}>
+                    <CircularProgress />
+                </Box>
             ) : (
                 <Paper sx={{ m: 2, height: '100%', maxHeight: '900px' }} elevation={0}>
                     <DataGrid
-                        rows={filteredProducts}
+                        rows={products.filter(p =>
+                            p.product_name.toLowerCase().includes(search.toLowerCase()) ||
+                            (p.barcode && p.barcode.toLowerCase().includes(search.toLowerCase()))
+                        )}
                         columns={columns}
                         pageSize={rowsPerPage}
                         rowsPerPageOptions={[5, 10, 25]}
@@ -267,29 +301,22 @@ const Product = () => {
                         disableSelectionOnClick
                         getRowId={(row) => row.product_id}
                         sx={{
-
                             borderRadius: 0,
-                            /* remove outer border */
                             border: 'none',
-                            /* remove cell bottom borders */
                             '& .MuiDataGrid-cell': {
                                 borderBottom: 'none',
                             },
-                            /* remove header bottom border */
                             '& .MuiDataGrid-columnHeaders': {
                                 borderBottom: 'none',
                                 backgroundColor: '#f5f5f5',
                             },
-                            /* hide the little vertical separators between columns */
                             '& .MuiDataGrid-columnSeparator': {
                                 display: 'none',
                             },
-                            /* remove footer top border */
                             '& .MuiDataGrid-footerContainer': {
                                 borderTop: 'none',
                                 backgroundColor: '#f5f5f5',
                             },
-                            /* rest of your styling… */
                             '& .MuiDataGrid-virtualScroller': {
                                 backgroundColor: '#ffffff',
                             },
@@ -303,7 +330,6 @@ const Product = () => {
                             '& .MuiDataGrid-row.Mui-selected:hover': {
                                 backgroundColor: StyleColors.appColorLv1,
                             },
-                            /* remove focus outlines */
                             '& .MuiDataGrid-cell:focus, & .MuiDataGrid-cell:focus-within, & .MuiDataGrid-columnHeader:focus': {
                                 outline: 'none',
                             },
@@ -312,14 +338,24 @@ const Product = () => {
                 </Paper>
             )}
 
-            {/* Dialog */}
-            <Dialog open={openDialog} fullWidth maxWidth="md">
+            {/* Product Dialog */}
+            <Dialog 
+                open={openDialog} 
+                fullWidth 
+                maxWidth="md" 
+                onClose={handleClose}
+            >
                 <DialogTitle>
                     {isCreateNew ? 'Create New Product' : 'Update Product'}
                     <IconButton
                         aria-label="close"
                         onClick={handleClose}
-                        sx={{ position: 'absolute', right: 8, top: 8 }}
+                        sx={{ 
+                            position: 'absolute', 
+                            right: 8, 
+                            top: 8,
+                            color: (theme) => theme.palette.grey[500],
+                        }}
                     >
                         <CloseIcon />
                     </IconButton>
@@ -357,6 +393,23 @@ const Product = () => {
                             </POSFormTextField>
 
                             <POSFormTextField
+                                name="code"
+                                label="Product Code"
+                                prefixIcon={<CodeIcon />}
+                                value={formData.code}
+                                onChange={handleChange}
+                            />
+
+                            <POSFormTextField
+                                name="barcode"
+                                label="Barcode"
+                                prefixIcon={<CodeIcon />}
+                                value={formData.barcode}
+                                onChange={handleChange}
+                                placeholder="Enter barcode"
+                            />
+
+                            <POSFormTextField
                                 name="cost_price"
                                 label="Cost Price"
                                 type="number"
@@ -391,26 +444,18 @@ const Product = () => {
                                 helperText={errors.stock}
                                 required
                             />
-                            {/* 
-                            <POSFormTextField
-                                name="group_code"
-                                label="Group Code"
-                                prefixIcon={<CodeIcon />}
-                                value={formData.group_code}
-                                onChange={handleChange}
-                            /> */}
-
 
                             <POSFormImageUpload
                                 name="image_url"
                                 label="Upload Image"
                                 uploadPreset="NurakPOS"
                                 value={formData.image_url}
-                                onUpload={(e) => {
-                                    setFormData(prev => ({ ...prev, ['image_url']: e }));
-                                    if (errors[name]) setErrors(prev => ({ ...prev, ['image_url']: e }));
+                                onUpload={(url) => {
+                                    setFormData(prev => ({ ...prev, image_url: url }));
                                 }}
-                                onError={(err) => null}
+                                onError={(err) => {
+                                    showNotification('Failed to upload image', 'error');
+                                }}
                             />
 
                             <POSFormTextField
@@ -421,24 +466,39 @@ const Product = () => {
                                 prefixIcon={<DescriptionIcon />}
                                 value={formData.description}
                                 onChange={handleChange}
+                                sx={{ gridColumn: '1 / -1' }}
                             />
                         </Box>
                     </DialogContent>
                     <DialogActions sx={{ p: 2 }}>
-                        <Button onClick={handleClose} sx={StyleColors.ButtonStyleOutline}>Cancel</Button>
-                        <Button type="submit" sx={StyleColors.ButtonStyle}>Save Product</Button>
-
+                        <Button 
+                            onClick={handleClose}
+                            sx={StyleColors.ButtonStyleOutline}
+                        >
+                            Cancel
+                        </Button>
+                        <Button 
+                            type="submit" 
+                            sx={StyleColors.ButtonStyle}
+                        >
+                            Save Product
+                        </Button>
                     </DialogActions>
                 </form>
             </Dialog>
 
-            {/* Notification */}
+            {/* Enhanced Notification Snackbar */}
             <Snackbar
                 open={notify.open}
-                autoHideDuration={6000}
+                autoHideDuration={notify.duration}
                 onClose={() => setNotify(prev => ({ ...prev, open: false }))}
+                anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
             >
-                <Alert severity={notify.severity} onClose={() => setNotify(prev => ({ ...prev, open: false }))}>
+                <Alert 
+                    severity={notify.severity} 
+                    onClose={() => setNotify(prev => ({ ...prev, open: false }))}
+                    sx={{ width: '100%' }}
+                >
                     {notify.message}
                 </Alert>
             </Snackbar>
