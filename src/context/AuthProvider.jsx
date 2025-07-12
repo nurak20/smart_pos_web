@@ -5,6 +5,7 @@ const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
     const [isAuthenticated, setIsAuthenticated] = useState(false);
+    const [isPosAdmin, setIsPosAdmin] = useState(false);
     const [user, setUser] = useState(null);
     const [authorization, setAuthorization] = useState(null);
     const [loading, setLoading] = useState(true);
@@ -65,10 +66,16 @@ export const AuthProvider = ({ children }) => {
     const isAdmin = () => {
         return hasRole('administrator');
     };
+    const openPos = () => {
+        setIsPosAdmin(!isPosAdmin);
+
+    };
 
     return (
         <AuthContext.Provider value={{
+            isPosAdmin,
             isAuthenticated,
+            isAdmin,
             user,
             authorization,
             loading,
@@ -77,7 +84,8 @@ export const AuthProvider = ({ children }) => {
             hasRole,
             hasPermission,
             isAdmin,
-            checkAuthStatus
+            checkAuthStatus,
+            openPos,
         }}>
             {children}
         </AuthContext.Provider>

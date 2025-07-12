@@ -52,6 +52,7 @@ import { useAuth } from '../context/AuthProvider';
 import { axiosGET, axiosPOST } from '../service/ApiService';
 import './global.css';
 import { StyleColors } from '../util/helper/Extension';
+import POSAppBar from '../page/dasboard/layouts/POSAppBar';
 
 // Product Service Provider - Clean, professional code structure
 class ProductService {
@@ -97,16 +98,16 @@ class ProductService {
 // Payment Service Provider
 class PaymentService {
     static paymentMethods = [
-        { 
-            id: 'cash', 
+        {
+            id: 'cash',
             name: 'Cash',
-            icon: '💵', 
-            src: "https://www.usatoday.com/gcdn/-mm-/e76b3f8780406e2332171b90051c86d67cb0349b/c=0-85-2122-1282/local/-/media/USATODAY/USATODAY/2014/09/04/1409858217000-492529263.jpg?width=2122&height=1197&fit=crop&format=pjpg&auto=webp" 
+            icon: '💵',
+            src: "https://www.usatoday.com/gcdn/-mm-/e76b3f8780406e2332171b90051c86d67cb0349b/c=0-85-2122-1282/local/-/media/USATODAY/USATODAY/2014/09/04/1409858217000-492529263.jpg?width=2122&height=1197&fit=crop&format=pjpg&auto=webp"
         },
-        { 
-            id: 'ac', 
-            name: 'ACLEDA Bank Plc. - Cambodia', 
-            src: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRM37KLHTgu31C4LMRGMBzIu7QwwJXVeOC-EA&s' 
+        {
+            id: 'ac',
+            name: 'ACLEDA Bank Plc. - Cambodia',
+            src: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRM37KLHTgu31C4LMRGMBzIu7QwwJXVeOC-EA&s'
         },
     ];
 
@@ -164,21 +165,22 @@ export default function POSAdminSystem() {
 
     // Fetch products from API
     useEffect(() => {
-        const fetchProducts = async () => {
-            try {
-                setLoading(true);
-                const data = await ProductService.getProducts();
-                setAllProducts(data || []);
-            } catch (error) {
-                console.error('Failed to fetch products:', error);
-                setAllProducts([]);
-            } finally {
-                setLoading(false);
-            }
-        };
+
 
         fetchProducts();
     }, []);
+    const fetchProducts = async () => {
+        try {
+            setLoading(true);
+            const data = await ProductService.getProducts();
+            setAllProducts(data || []);
+        } catch (error) {
+            console.error('Failed to fetch products:', error);
+            setAllProducts([]);
+        } finally {
+            setLoading(false);
+        }
+    };
 
     // Get filtered products based on category and search
     const filteredProducts = useMemo(() => {
@@ -204,10 +206,10 @@ export default function POSAdminSystem() {
     // Add product to sell list or update quantity if exists
     const addToSellList = (product) => {
         setSellList(prevList => {
-            const existingItem = prevList.find(item => item.code === product.code);
+            const existingItem = prevList.find(item => item.product_id === product.product_id);
             if (existingItem) {
                 return prevList.map(item =>
-                    item.code === product.code
+                    item.product_id === product.product_id
                         ? { ...item, quantity: item.quantity + 1 }
                         : item
                 );
@@ -218,21 +220,21 @@ export default function POSAdminSystem() {
     };
 
     // Update quantity in sell list
-    const updateQuantity = (productCode, newQuantity) => {
+    const updateQuantity = (product_id, newQuantity) => {
         if (newQuantity <= 0) {
-            removeFromSellList(productCode);
+            removeFromSellList(product_id);
             return;
         }
         setSellList(prevList =>
             prevList.map(item =>
-                item.code === productCode ? { ...item, quantity: newQuantity } : item
+                item.product_id === product_id ? { ...item, quantity: newQuantity } : item
             )
         );
     };
 
     // Remove item from sell list
-    const removeFromSellList = (productCode) => {
-        setSellList(prevList => prevList.filter(item => item.code !== productCode));
+    const removeFromSellList = (product_id) => {
+        setSellList(prevList => prevList.filter(item => item.product_id !== product_id));
     };
 
     // Clear the entire cart
@@ -270,7 +272,7 @@ export default function POSAdminSystem() {
                     sub_total: totalAmount
                 },
                 order_detail: sellList.map(item => ({
-                    product_code: item.code,
+                    product_id: item.product_id,
                     qty: item.quantity,
                     price: parseFloat(item.selling_price || 0),
                     discount: 0,
@@ -283,17 +285,20 @@ export default function POSAdminSystem() {
                 }))
             };
 
-            setPaymentDialog(false);
-            const response = await axiosGET('v1/order/invoice', orderData);
+            const response = await axiosPOST('v1/order/invoice', orderData);
 
             if (response) {
                 sendOrderNotification(response);
                 clearCart();
                 setSelectedPaymentMethod([]);
+                setPaymentDialog(false);
+                fetchProducts();
+
             } else {
                 const errorData = await response.json();
                 throw new Error(errorData.message || 'Failed to process order');
             }
+
         } catch (error) {
             console.error('Payment processing error:', error);
             alert(`Payment failed: ${error.message}\nPlease try again.`);
@@ -360,32 +365,36 @@ export default function POSAdminSystem() {
 
     if (loading) {
         return (
-            <Box 
-                sx={{ 
-                    minHeight: '100vh', 
-                    bgcolor: 'grey.50', 
-                    display: 'flex', 
-                    alignItems: 'center', 
-                    justifyContent: 'center' 
+            <Box
+                sx={{
+                    minHeight: '100vh',
+                    bgcolor: 'grey.50',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center'
                 }}
             >
                 <Typography variant="h6">Loading products...</Typography>
             </Box>
         );
     }
-    const Translate = (t) =>{
+    const Translate = (t) => {
         return "pos";
     }
 
     return (
-        <Box ref={posContainerRef} sx={{ minHeight: '100vh', width: '100%', position: 'fixed', top: 0,overscrollBehavior: 'none', }}>
+        <Box ref={posContainerRef} sx={{ minHeight: '100vh', width: '100%', position: 'fixed', top: 0, overscrollBehavior: 'none', backgroundColor: "rgb(244, 244, 244)", }}>
+
             <Container maxWidth="xl" sx={{ py: { xs: 1, md: 2 }, px: { xs: 1, md: 3 } }}>
-                <Grid container spacing={{ xs: 1, md: 3 }}>
+                <POSAppBar ispLeftRight={false} isPos />
+                <Box sx={{ mt: 2 }}></Box>
+                <Grid container spacing={{ xs: 1, md: 2, }}>
+
                     {/* Left Panel - Products */}
                     <Grid
                         size={{ xs: 12, md: 8, lg: 8 }}
                         sx={{
-                            backgroundColor: "#f9f6f8",
+                            backgroundColor: "white",
                             borderRadius: "10px",
                             p: { xs: 1, md: 2 }
                         }}
@@ -417,12 +426,15 @@ export default function POSAdminSystem() {
                                             fontSize: { xs: "0.75rem", sm: "0.875rem", md: "1rem" },
                                             py: 2,
                                             px: 3,
-                                            borderRadius: "8px",
-                                            whiteSpace: "nowrap",
-                                            borderColor: selectedCategory === category.id ? StyleColors.appColorLv7 : "grey.300",                                           
-                                            bgcolor: selectedCategory === category.id ? '#99697d' : StyleColors.appColorLv2,
+                                            boxShadow: "none",
+                                            borderRadius: "15px",
+                                            fontWeight: "600",
+                                            textTransform: "capitalize",
+                                            border: "0px solid",
+                                            borderColor: selectedCategory === category.id ? StyleColors.appColorLv7 : "grey.300",
+                                            bgcolor: selectedCategory === category.id ? StyleColors.appColorLv7 : StyleColors.appColorLv2,
                                             color: selectedCategory === category.id ? 'white' : '#99697d',
-                                            flexShrink: 0                                            
+                                            flexShrink: 0
                                         }}
                                     >
                                         {category.name}
@@ -443,7 +455,8 @@ export default function POSAdminSystem() {
                                     display: "none"
                                 },
                                 msOverflowStyle: "none",
-                                px: { xs: 1, md: 2 }
+                                px: { xs: 1, md: 2 },
+                                py: 1
                             }}
                         >
                             {filteredProducts.length === 0 ? (
@@ -457,13 +470,14 @@ export default function POSAdminSystem() {
                                             fontSize: { xs: "1rem", md: "1.25rem" }
                                         }}
                                     >
-                                        {searchQuery ? `No products found for "${searchQuery}"` : `${Translate({km: "មិនមានផលិតផលទេ", en: "No products available"})}`}
+                                        {searchQuery ? `No products found for "${searchQuery}"` : `${Translate({ km: "មិនមានផលិតផលទេ", en: "No products available" })}`}
                                     </Typography>
                                 </Grid>
                             ) : (
                                 filteredProducts.map((product) => (
-                                    <Grid key={product.code} size={{ xs: 6, sm: 4, md: 4, lg: 3 }}>
+                                    <Grid key={product.id} size={{ xs: 6, sm: 4, md: 4, lg: 3, xl: 3 }}>
                                         <Card
+
                                             elevation={0}
                                             sx={{
                                                 borderRadius: "10px",
@@ -471,26 +485,28 @@ export default function POSAdminSystem() {
                                                 cursor: "pointer",
                                                 transition: "transform 0.2s, box-shadow 0.2s",
                                                 border: "none",
+                                                boxShadow: "rgba(201, 201, 201, 0.2) 0px 8px 24px",
                                                 borderColor: "grey.50",
                                                 "&:hover": {
-                                                    transform: "translateY(-2px)",
+
                                                     boxShadow: "rgba(99, 99, 99, 0.2) 0px 2px 8px 0px;"
+
                                                 },
                                                 "&:active": {
                                                     transform: "translateY(0px)"
                                                 }
                                             }}
-                                            onClick={() => addToSellList(product)}
+                                            onClick={() => product.stock > 0 ? addToSellList(product) : null}
                                         >
                                             <CardMedia
                                                 component="img"
-                                                image={product.image_url || 'https://via.placeholder.com/150'}
+                                                image={product.image_url || 'https://thumbs.dreamstime.com/b/no-image-available-icon-flat-vector-no-image-available-icon-flat-vector-illustration-132482953.jpg'}
                                                 alt={product.product_name}
                                                 sx={{
                                                     height: { xs: 80, sm: 120, md: 160, lg: 180 },
                                                     objectFit: "cover"
                                                 }}
-                                                onError={(e) => (e.target.src = 'https://via.placeholder.com/150')}
+                                                onError={(e) => (e.target.src = 'https://thumbs.dreamstime.com/b/no-image-available-icon-flat-vector-no-image-available-icon-flat-vector-illustration-132482953.jpg')}
                                             />
                                             <CardContent sx={{ p: { xs: 1, sm: 1.5, md: 2 } }}>
                                                 <Typography
@@ -501,12 +517,29 @@ export default function POSAdminSystem() {
                                                         WebkitBoxOrient: "vertical",
                                                         overflow: "hidden",
                                                         mb: 1,
+                                                        color: "GrayText",
                                                         fontSize: { xs: "0.75rem", sm: "0.875rem", md: "0.875rem" },
                                                         lineHeight: { xs: 1.2, md: 1.4 },
-                                                        fontWeight: "medium"
+                                                        fontWeight: "600"
                                                     }}
                                                 >
                                                     {product.product_name}
+                                                </Typography>
+                                                <Typography
+                                                    variant="body2"
+                                                    sx={{
+                                                        display: "-webkit-box",
+                                                        WebkitLineClamp: 2,
+                                                        WebkitBoxOrient: "vertical",
+                                                        overflow: "hidden",
+                                                        mb: 1,
+                                                        color: "GrayText",
+                                                        fontSize: { xs: "0.5rem", sm: "0.6rem", md: "0.7rem" },
+                                                        lineHeight: { xs: 1.2, md: 1.4 },
+                                                        fontWeight: "500"
+                                                    }}
+                                                >
+                                                    Stock : {product.stock}
                                                 </Typography>
                                             </CardContent>
                                         </Card>
@@ -517,14 +550,16 @@ export default function POSAdminSystem() {
                     </Grid>
 
                     {/* Right Panel - Sell List (Desktop Only) */}
-                    <Grid size={{ md: 4, lg: 4 }} sx={{ display: { xs: 'none', md: 'block' } }}>
+                    <Grid size={{ md: 4, lg: 4 }} sx={{ display: { xs: 'none', md: 'block', } }}>
                         <Paper
                             sx={{
-                                p: 2,
+                                p: 3,
+                                boxShadow: "rgba(212, 212, 212, 0.15) 0px 48px 60px 0px;",
+
                                 position: "sticky",
                                 top: 16,
                                 borderRadius: "10px",
-                                backgroundColor: "#f9f6f8",
+                                backgroundColor: "white",
                                 minHeight: '680px',
                                 maxHeight: "calc(100vh - 120px)",
                                 display: "flex",
@@ -532,43 +567,43 @@ export default function POSAdminSystem() {
                             }}
                             elevation={0}
                         >
-                            <Typography 
-                                variant="h6" 
-                                sx={{ 
-                                    mb: 2, 
-                                    display: "flex", 
-                                    alignItems: "center" 
+                            <Typography
+                                variant="h6"
+                                sx={{
+                                    mb: 2,
+                                    display: "flex",
+                                    alignItems: "center"
                                 }}
                             >
-                                <ShoppingCart sx={{ mr: 1}} />
-                                {Translate({ 
-                                    km: `បញ្ជីលក់ (${totalItems} ទំនិញ)`, 
-                                    en: `Sell List (${totalItems} items)` 
+                                <ShoppingCart sx={{ mr: 1 }} />
+                                {Translate({
+                                    km: `បញ្ជីលក់ (${totalItems} ទំនិញ)`,
+                                    en: `Sell List (${totalItems} items)`
                                 })}
                             </Typography>
 
                             {sellList.length === 0 ? (
-                                <Box 
-                                    sx={{ 
-                                        height: '100%', 
-                                        display: 'flex', 
-                                        flexDirection: 'column', 
-                                        justifyContent: 'center', 
-                                        alignItems: 'center' 
+                                <Box
+                                    sx={{
+                                        height: '100%',
+                                        display: 'flex',
+                                        flexDirection: 'column',
+                                        justifyContent: 'center',
+                                        alignItems: 'center'
                                     }}
                                 >
-                                    <Typography 
-                                        variant="body2" 
-                                        color="text.secondary" 
+                                    <Typography
+                                        variant="body2"
+                                        color="text.secondary"
                                         sx={{ textAlign: "center", py: 4 }}
                                     >
                                         {Translate({ km: 'មិនមានទំនិញក្នុងបញ្ជី', en: 'No items in sell list' })}
                                     </Typography>
                                 </Box>
                             ) : (
-                                <List sx={{ flexGrow: 1, overflowY: "auto", maxHeight: "500px" }}>
+                                <List sx={{ flexGrow: 1, overflowY: "auto", maxHeight: "500px", }}>
                                     {sellList.map((item) => (
-                                        <Box key={item.code}>
+                                        <Box key={item.product_id}>
                                             <ListItem sx={{ px: 0 }}>
                                                 <ListItemText
                                                     primary={item.product_name}
@@ -576,20 +611,20 @@ export default function POSAdminSystem() {
                                                     sx={{ flexGrow: 1 }}
                                                 />
                                                 <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                                                    <IconButton size="small" onClick={() => updateQuantity(item.code, item.quantity - 1)}>
+                                                    <IconButton size="small" onClick={() => updateQuantity(item.product_id, item.quantity - 1)}>
                                                         <Remove fontSize="small" />
                                                     </IconButton>
                                                     <Typography sx={{ mx: 1, minWidth: 32, textAlign: "center" }}>
                                                         {item.quantity}
                                                     </Typography>
-                                                    <IconButton size="small" onClick={() => updateQuantity(item.code, item.quantity + 1)}>
+                                                    <IconButton size="small" onClick={() => updateQuantity(item.product_id, item.quantity + 1)}>
                                                         <Add fontSize="small" />
                                                     </IconButton>
                                                 </Box>
                                             </ListItem>
-                                            <Typography 
-                                                variant="body2" 
-                                                color="text.secondary" 
+                                            <Typography
+                                                variant="body2"
+                                                color="text.secondary"
                                                 sx={{ textAlign: "right", mr: 2, mb: 1 }}
                                             >
                                                 Subtotal: ${(parseFloat(item.selling_price || 0) * item.quantity).toFixed(2)}
@@ -604,19 +639,19 @@ export default function POSAdminSystem() {
                             <Box sx={{ flexGrow: 1 }} />
 
                             {/* Payment Section - Always at bottom */}
-                            <Box sx={{ mt: 2, p: 2, bgcolor: "grey.100", borderRadius: 1 }}>
-                                <Typography 
-                                    variant="h6" 
+                            <Box sx={{ my: 2, p: 2, bgcolor: "grey.50", borderRadius: 2.8 }}>
+                                <Typography
+                                    variant="h6"
                                     sx={{ display: "flex", justifyContent: "space-between", mb: 1 }}
                                 >
                                     <span>{Translate({ km: 'ចំនួនទំនិញសរុប ៖', en: 'Total Items:' })}</span>
                                     <span>{totalItems}</span>
                                 </Typography>
-                                <Typography 
-                                    variant="h5" 
-                                    color="success.main" 
-                                    sx={{ 
-                                        display: "flex", 
+                                <Typography
+                                    variant="h5"
+                                    color="success.main"
+                                    sx={{
+                                        display: "flex",
                                         justifyContent: "space-between",
                                         fontWeight: "bold"
                                     }}
@@ -632,19 +667,14 @@ export default function POSAdminSystem() {
                                 size="large"
                                 disabled={sellList.length === 0}
                                 onClick={() => setPaymentDialog(true)}
-                                sx={{
-                                    mt: 2,
-                                    py: 3,
-                                    bgcolor: '#825567',
-                                    color: "white"
-                                    
-                                }}
+                                sx={{ ...StyleColors.ButtonStyle, py: 3.5, borderRadius: 2.8, fontWeight: '600' }}
                                 startIcon={<Payment />}
                             >
                                 Payment
                             </Button>
                         </Paper>
                     </Grid>
+
                 </Grid>
             </Container>
 
@@ -696,7 +726,7 @@ export default function POSAdminSystem() {
                         {sellList.length === 0 ? 'Cart Empty' : `Pay $${totalAmount.toFixed(2)}`}
                     </Button>
                 </Box>
-                            </Box>
+            </Box>
 
             {/* Payment Dialog */}
             <Dialog
@@ -706,12 +736,12 @@ export default function POSAdminSystem() {
                 maxWidth="sm"
             >
                 <DialogTitle sx={{ display: 'flex', alignItems: 'center' }}>
-                    <Payment sx={{ mr: 1}} />
+                    <Payment sx={{ mr: 1 }} />
                     {Translate({ km: 'ការទូទាត់', en: 'Payment' })}
                 </DialogTitle>
                 <DialogContent dividers>
                     <Box sx={{ mb: 3 }}>
-                        <Typography variant="h6" sx={{ mb: 1  }}>
+                        <Typography variant="h6" sx={{ mb: 1 }}>
                             {Translate({ km: 'ធាតុក្នុងបញ្ជី', en: 'Items in Cart' })}
                         </Typography>
                         <List dense sx={{ maxHeight: 200, overflow: 'auto' }}>
@@ -825,6 +855,6 @@ export default function POSAdminSystem() {
                     </Button>
                 </DialogActions>
             </Dialog>
-        </Box>
+        </Box >
     );
 }

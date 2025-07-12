@@ -6,16 +6,18 @@ import POSAdminSystem from "./pos/Pos";
 
 
 const App = () => {
-  const { isAuthenticated, isAdmin } = useAuth();
+  const { isAuthenticated, isAdmin, isPosAdmin } = useAuth();
   if (!isAuthenticated) {
     return (
       <Login />
     )
   }
+  if (isPosAdmin) {
+    return <POSAdminSystem />
+  }
   return (
     <>
-      {/* <Dashboard /> */}
-      <POSAdminSystem />
+      <Dashboard />
     </>
   )
 }

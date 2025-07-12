@@ -273,21 +273,21 @@ const Product = () => {
                 </Box>
             </AppBar>
 
-            <Box sx={{ m: 2, display: 'flex', justifyContent: 'flex-end' }}>
+            {/* <Box sx={{ m: 2, display: 'flex', justifyContent: 'flex-end' }}>
                 <TextField
                     placeholder="Search by name or barcode..."
                     value={search}
                     onChange={e => setSearch(e.target.value)}
                     InputProps={{ startAdornment: <SearchIcon /> }}
                 />
-            </Box>
+            </Box> */}
 
             {loading ? (
                 <Box sx={{ display: 'flex', justifyContent: 'center', p: 4 }}>
                     <CircularProgress />
                 </Box>
             ) : (
-                <Paper sx={{ m: 2, height: '100%', maxHeight: '900px' }} elevation={0}>
+                <Paper sx={{ m: 2, height: '100%', maxHeight: '700px', overflow: 'auto', minWidth: 800 }} elevation={0}>
                     <DataGrid
                         rows={products.filter(p =>
                             p.product_name.toLowerCase().includes(search.toLowerCase()) ||
